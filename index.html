@@ -51,17 +51,26 @@
 <script>
 'use strict';
 var canvas = document.querySelector('canvas');
-canvas.width = 640;
-canvas.height = 640;
+canvas.width = 320;
+canvas.height = 576;
 var g = canvas.getContext('2d');
 var gameMode = 'normal';
 var fallingShape, nextShape;
 var grid = [];
-var nRows = 18, nCols = 12;
+var nRows = 20, nCols = 10;
 var blockSize = 30;
 var fallingShapeRow, fallingShapeCol;
 var score = 0, level = 1, linesCleared = 0;
 var gameOver = false;
+var shapes = [
+    [[1,1,1,1]],  // I
+    [[1,1],[1,1]],  // O
+    [[0,1,0],[1,1,1]],  // T
+    [[1,0,0],[1,1,1]],  // L
+    [[0,0,1],[1,1,1]],  // J
+    [[1,1,0],[0,1,1]],  // S
+    [[0,1,1],[1,1,0]]   // Z
+];
 
 function startNewGame() {
     gameOver = false;
@@ -94,11 +103,17 @@ function initGrid() {
     }
 }
 
+function selectShape() {
+    fallingShape = shapes[Math.floor(Math.random() * shapes.length)];
+    fallingShapeRow = 0;
+    fallingShapeCol = Math.floor(nCols / 2) - Math.floor(fallingShape[0].length / 2);
+}
+
 function animate(lastFrameTime) {
     if (gameOver) return;
     var time = new Date().getTime();
     if (lastFrameTime + 700 - level * 50 < time) {
-        if (!canMove(fallingShape, { x: 0, y: 1 })) {
+        if (!canMove({ x: 0, y: 1 })) {
             shapeHasLanded();
         } else {
             fallingShapeRow++;
@@ -109,23 +124,40 @@ function animate(lastFrameTime) {
     requestAnimationFrame(() => animate(lastFrameTime));
 }
 
+function canMove(offset) {
+    return fallingShape.every((row, r) => row.every((cell, c) => {
+        let newRow = fallingShapeRow + r + offset.y;
+        let newCol = fallingShapeCol + c + offset.x;
+        return cell === 0 || (grid[newRow] && grid[newRow][newCol] === -1);
+    }));
+}
+
+function shapeHasLanded() {
+    fallingShape.forEach((row, r) => row.forEach((cell, c) => {
+        if (cell) grid[fallingShapeRow + r][fallingShapeCol + c] = 1;
+    }));
+    selectShape();
+}
+
 function draw() {
     g.clearRect(0, 0, canvas.width, canvas.height);
-    for (let r = 0; r < nRows; r++) {
-        for (let c = 0; c < nCols; c++) {
-            if (grid[r][c] !== -1) drawSquare(grid[r][c], r, c);
-        }
-    }
+    grid.forEach((row, r) => row.forEach((cell, c) => {
+        if (cell !== -1) drawSquare(cell, r, c);
+    }));
+    fallingShape.forEach((row, r) => row.forEach((cell, c) => {
+        if (cell) drawSquare(1, fallingShapeRow + r, fallingShapeCol + c);
+    }));
 }
 
 function drawSquare(color, r, c) {
-    g.fillStyle = ['red', 'blue', 'green', 'yellow'][color] || 'gray';
+    g.fillStyle = color === -2 ? 'gray' : 'cyan';
     g.fillRect(c * blockSize, r * blockSize, blockSize, blockSize);
     g.strokeStyle = 'black';
     g.strokeRect(c * blockSize, r * blockSize, blockSize, blockSize);
 }
 
 initGrid();
+selectShape();
 draw();
 </script>
 </body>
