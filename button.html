@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+<meta charset='UTF-8'>
+<title>Classic Tetris</title>
+<style>
+body {
+    text-align: center;
+    background: #000;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background: #ff4b2b;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    margin-top: 20%;
+    box-shadow: 0 4px 8px rgba(255, 75, 43, 0.5);
+}
+button:hover {
+    background: #ff416c;
+}
+canvas {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+    <button onclick="openTetris()">🎮 Play Tetris</button>
+
+<script>
+function openTetris() {
+    let win = window.open("about:blank", "_blank");
+    if (!win) {
+        alert("Popup blocked! Allow popups to play the game.");
+        return;
+    }
+    
+    let html = `
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+    <meta charset='UTF-8'>
+    <title>Tetris</title>
+    <style>
+        body { background: black; margin: 0; overflow: hidden; }
+        canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 640px; height: 640px; }
+    </style>
+    </head>
+    <body>
+    <canvas></canvas>
+    <script>
+    
+    <\/script>
+    </body>
+    </html>`;
+    
+    win.document.write(html);
+    win.document.close();
+}
+</script>
+</body>
+</html>
