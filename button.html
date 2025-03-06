@@ -56,7 +56,191 @@ function openTetris() {
     <body>
     <canvas></canvas>
     <script>
-    
+    <!DOCTYPE html>
+<html lang='en'>
+
+<head>
+<meta charset='UTF-8'>
+<title>Classic Tetris</title>
+<style>
+canvas {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: 640px;
+    height: 640px;
+    margin: -320px 0 0 -320px;
+    background: black;
+}
+.controls {
+    text-align: center;
+    margin-bottom: 10px;
+}
+button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    background: #ff4b2b;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+button:hover {
+    background: #ff416c;
+}
+</style>
+</head>
+
+<body>
+    <div class="controls">
+        <button onclick="startNewGame()">Restart</button>
+        <button onclick="skipLevel()">Skip Level</button>
+        <button onclick="setMode('normal')">Normal Mode</button>
+        <button onclick="setMode('practice')">Practice Mode</button>
+        <button onclick="setMode('target')">Target Mode</button>
+    </div>
+    <canvas></canvas>
+
+<script>
+'use strict';
+var canvas = document.querySelector('canvas');
+canvas.width = 640;
+canvas.height = 640;
+var g = canvas.getContext('2d');
+var gameMode = 'normal';
+var fallingShape, nextShape;
+var dim = 640;
+var nRows = 18, nCols = 12;
+var blockSize = 30;
+var fallingShapeRow, fallingShapeCol;
+var score = 0, level = 1, linesCleared = 0;
+var gameOver = false;
+var targetLines = 10;
+var shapes = [
+    { pos: [[0, -1], [0, 0], [-1, 0], [-1, 1]], color: 'red' }, // Z
+    { pos: [[0, -1], [0, 0], [1, 0], [1, 1]], color: 'green' }, // S
+    { pos: [[0, -1], [0, 0], [0, 1], [0, 2]], color: 'cyan' }, // I
+    { pos: [[-1, 0], [0, 0], [1, 0], [0, 1]], color: 'purple' }, // T
+    { pos: [[0, 0], [1, 0], [0, 1], [1, 1]], color: 'yellow' }, // Square
+    { pos: [[-1, -1], [0, -1], [0, 0], [0, 1]], color: 'orange' }, // L
+    { pos: [[1, -1], [0, -1], [0, 0], [0, 1]], color: 'blue' } // J
+];
+
+function startNewGame() {
+    gameOver = false;
+    score = 0;
+    level = 1;
+    linesCleared = 0;
+    initGrid();
+    selectShape();
+    draw();
+    animate(-1);
+}
+
+function skipLevel() {
+    if (gameMode !== 'practice') {
+        level++;
+    }
+}
+
+function setMode(mode) {
+    gameMode = mode;
+    startNewGame();
+}
+
+function shapeHasLanded() {
+    addShape(fallingShape);
+    linesCleared++;
+    if (gameMode === 'target' && linesCleared >= targetLines) {
+        alert('Target Mode Complete!');
+        gameOver = true;
+        return;
+    }
+    selectShape();
+}
+
+function animate(lastFrameTime) {
+    if (gameOver) return;
+    var time = new Date().getTime();
+    var delay = Math.max(700 - level * 50, 100);
+    if (lastFrameTime + delay < time) {
+        if (canMove(fallingShape, { x: 0, y: 1 })) {
+            move({ x: 0, y: 1 });
+        } else {
+            shapeHasLanded();
+        }
+        draw();
+        lastFrameTime = time;
+    }
+    requestAnimationFrame(() => animate(lastFrameTime));
+}
+
+function draw() {
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    drawUI();
+    drawFallingShape();
+}
+
+function drawUI() {
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawFallingShape() {
+    if (!fallingShape) return;
+    g.fillStyle = fallingShape.color;
+    fallingShape.pos.forEach(function (p) {
+        g.fillRect(
+            (fallingShapeCol + p[0]) * blockSize,
+            (fallingShapeRow + p[1]) * blockSize,
+            blockSize,
+            blockSize
+        );
+        g.strokeStyle = 'black';
+        g.strokeRect(
+            (fallingShapeCol + p[0]) * blockSize,
+            (fallingShapeRow + p[1]) * blockSize,
+            blockSize,
+            blockSize
+        );
+    });
+}
+
+function rotateShape() {
+    var newPos = fallingShape.pos.map(p => [-p[1], p[0]]);
+    var rotatedShape = { pos: newPos, color: fallingShape.color };
+    if (canMove(rotatedShape, { x: 0, y: 0 })) {
+        fallingShape.pos = newPos;
+    }
+    draw();
+}
+
+document.addEventListener('keydown', function(event) {
+    switch (event.key) {
+        case 'ArrowLeft':
+            if (canMove(fallingShape, { x: -1, y: 0 })) move({ x: -1, y: 0 });
+            break;
+        case 'ArrowRight':
+            if (canMove(fallingShape, { x: 1, y: 0 })) move({ x: 1, y: 0 });
+            break;
+        case 'ArrowDown':
+            if (canMove(fallingShape, { x: 0, y: 1 })) move({ x: 0, y: 1 });
+            break;
+        case 'ArrowUp':
+            rotateShape();
+            break;
+    }
+    draw();
+});
+
+initGrid();
+selectShape();
+draw()`;
+</script>
+</body>
+</html>
+
     <\/script>
     </body>
     </html>`;
